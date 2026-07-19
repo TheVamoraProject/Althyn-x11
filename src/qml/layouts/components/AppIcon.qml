@@ -8,11 +8,12 @@ Button {
 
     background: Rectangle {
         color: "#00000000"
+        radius: 8
         MouseArea {
             width: window.height
             height: window.height
             hoverEnabled: true
-            onEntered: parent.color = "#07ffffff"
+            onEntered: parent.color = "#40272a2e" // zinc-800 hover
             onExited: parent.color = "#00000000"
         }
     }

@@ -59,5 +59,49 @@
         <file>assets/icons/maximize.svg</file>
         <file>assets/icons/minimize.svg</file>
         <file>assets/icons/restore.svg</file>
+        <file>assets/icons/lucide/account.svg</file>
+        <file>assets/icons/lucide/apps.svg</file>
+        <file>assets/icons/lucide/battery-charging.svg</file>
+        <file>assets/icons/lucide/battery-full.svg</file>
+        <file>assets/icons/lucide/battery-low.svg</file>
+        <file>assets/icons/lucide/battery-medium.svg</file>
+        <file>assets/icons/lucide/battery-warning.svg</file>
+        <file>assets/icons/lucide/bell-dot.svg</file>
+        <file>assets/icons/lucide/bell.svg</file>
+        <file>assets/icons/lucide/chevron-down.svg</file>
+        <file>assets/icons/lucide/chevron-left.svg</file>
+        <file>assets/icons/lucide/chevron-right.svg</file>
+        <file>assets/icons/lucide/clock.svg</file>
+        <file>assets/icons/lucide/close.svg</file>
+        <file>assets/icons/lucide/code.svg</file>
+        <file>assets/icons/lucide/computer.svg</file>
+        <file>assets/icons/lucide/download.svg</file>
+        <file>assets/icons/lucide/exclamation.svg</file>
+        <file>assets/icons/lucide/folder-open.svg</file>
+        <file>assets/icons/lucide/folder.svg</file>
+        <file>assets/icons/lucide/hard-drive.svg</file>
+        <file>assets/icons/lucide/help.svg</file>
+        <file>assets/icons/lucide/history.svg</file>
+        <file>assets/icons/lucide/house.svg</file>
+        <file>assets/icons/lucide/layout-grid.svg</file>
+        <file>assets/icons/lucide/layout-list.svg</file>
+        <file>assets/icons/lucide/maximize.svg</file>
+        <file>assets/icons/lucide/minimize.svg</file>
+        <file>assets/icons/lucide/pin-off.svg</file>
+        <file>assets/icons/lucide/pin.svg</file>
+        <file>assets/icons/lucide/power.svg</file>
+        <file>assets/icons/lucide/refresh.svg</file>
+        <file>assets/icons/lucide/search.svg</file>
+        <file>assets/icons/lucide/settings.svg</file>
+        <file>assets/icons/lucide/star.svg</file>
+        <file>assets/icons/lucide/usb.svg</file>
+        <file>assets/icons/lucide/volume-1.svg</file>
+        <file>assets/icons/lucide/volume-2.svg</file>
+        <file>assets/icons/lucide/volume-x.svg</file>
+        <file>assets/icons/lucide/wifi-high.svg</file>
+        <file>assets/icons/lucide/wifi-low.svg</file>
+        <file>assets/icons/lucide/wifi-off.svg</file>
+        <file>assets/icons/lucide/wifi-zero.svg</file>
+        <file>assets/icons/lucide/wifi.svg</file>
     </qresource>
 </RCC>

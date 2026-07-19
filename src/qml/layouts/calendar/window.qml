@@ -12,6 +12,18 @@ Window {
     title: "Vamora Calendar"
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
 
+    // ---- VamoraUI palette (dark, zinc, solid — no transparency here) ----
+    readonly property color cBg: "#18181b"        // zinc-900, solid
+    readonly property color cTopBar: "#27272a"    // zinc-800, solid
+    readonly property color cBorder: "#3f3f46"    // zinc-700
+    readonly property color cSurface: "#27272a"   // zinc-800
+    readonly property color cSurfaceHover: "#3f3f46" // zinc-700
+    readonly property color cText: "#f4f4f5"      // zinc-100
+    readonly property color cTextMuted: "#a1a1aa" // zinc-400
+    readonly property color cTextFaint: "#71717a" // zinc-500
+    readonly property color cAccent: "#ffffff"    // white accent (today marker)
+    readonly property color cOnAccent: "#09090b"  // near-black text on white
+
     property date viewDate: new Date()
     property date today: new Date()
 
@@ -29,20 +41,20 @@ Window {
 
     Rectangle {
         id: calendar
-        color: "#CC000000"
+        color: cBg
         width: parent.width
         height: parent.height
-        border.color: "#20ffffff"
+        border.color: cBorder
         border.width: 1
-        radius: 12
+        radius: 24
 
         // TOP BAR
         Rectangle {
             id: topBar
-            color: "#33838383"
+            color: cTopBar
             width: parent.width
             height: 50
-            radius: 12
+            radius: 24
 
             // squares off the bottom corners of the top bar so it doesn't
             // look like a separate rounded pill sitting inside a rounded window
@@ -55,7 +67,7 @@ Window {
 
             Rectangle {
                 // topbar outline
-                color: "#20ffffff"
+                color: cBorder
                 width: parent.width
                 height: 1
                 y: 49
@@ -70,14 +82,14 @@ Window {
 
                 background: Rectangle {
                     radius: width / 2
-                    color: "#0Fffffff"
+                    color: cSurface
                     border.width: 1
-                    border.color: "#26ffffff"
+                    border.color: cBorder
                     MouseArea {
                         anchors.fill: parent
                         hoverEnabled: true
-                        onEntered: parent.color = "#1Affffff"
-                        onExited: parent.color = "#0Fffffff"
+                        onEntered: parent.color = cSurfaceHover
+                        onExited: parent.color = cSurface
                     }
                 }
 
@@ -86,7 +98,7 @@ Window {
                 }
 
                 Image {
-                    source: "../../assets/icons/arrows/arrowleft.svg"
+                    source: "../../assets/icons/lucide/chevron-left.svg"
                     width: 14
                     height: 14
                     anchors.centerIn: parent
@@ -96,9 +108,10 @@ Window {
             Text {
                 anchors.centerIn: parent
                 text: Qt.formatDate(viewDate, "MMMM yyyy")
-                color: "#ffffff"
-                font.pixelSize: 16
+                color: cText
+                font.pixelSize: 15
                 font.weight: Font.Medium
+                font.family: "Inter"
             }
 
             Button { // next month
@@ -110,14 +123,14 @@ Window {
 
                 background: Rectangle {
                     radius: width / 2
-                    color: "#0Fffffff"
+                    color: cSurface
                     border.width: 1
-                    border.color: "#26ffffff"
+                    border.color: cBorder
                     MouseArea {
                         anchors.fill: parent
                         hoverEnabled: true
-                        onEntered: parent.color = "#1Affffff"
-                        onExited: parent.color = "#0Fffffff"
+                        onEntered: parent.color = cSurfaceHover
+                        onExited: parent.color = cSurface
                     }
                 }
 
@@ -126,7 +139,7 @@ Window {
                 }
 
                 Image {
-                    source: "../../assets/icons/arrows/arrowright.svg"
+                    source: "../../assets/icons/lucide/chevron-right.svg"
                     width: 14
                     height: 14
                     anchors.centerIn: parent
@@ -150,7 +163,7 @@ Window {
                     Text {
                         anchors.centerIn: parent
                         text: modelData
-                        color: "#80ffffff"
+                        color: cTextFaint
                         font.pixelSize: 12
                         font.weight: Font.Medium
                     }
@@ -191,14 +204,13 @@ Window {
                         width: 28
                         height: 28
                         radius: 14
-                        color: todayFlag ? "#26ffffff" : (dayMouse.containsMouse ? "#14ffffff" : "#00000000")
-                        border.width: todayFlag ? 1 : 0
-                        border.color: "#40ffffff"
+                        color: todayFlag ? cAccent : (dayMouse.containsMouse ? cSurfaceHover : "#00000000")
+                        border.width: 0
 
                         Text {
                             anchors.centerIn: parent
                             text: dayNum
-                            color: todayFlag ? "#ffffff" : "#d0ffffff"
+                            color: todayFlag ? cOnAccent : cText
                             font.pixelSize: 13
                             font.weight: todayFlag ? Font.DemiBold : Font.Normal
                         }

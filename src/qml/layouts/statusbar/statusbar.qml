@@ -16,8 +16,17 @@ Window {
     x: 0
     y: 0
 
+    // ---- VamoraUI palette (dark, zinc) ----
+    // status bar is the ONLY surface that stays translucent (no blur)
+    readonly property color cBarBg: "#CC09090b"        // zinc-950 @ 80%
+    readonly property color cHover: "#40272a2e"         // zinc-800 hover overlay
+    readonly property color cDivider: "#33ffffff"
+    readonly property color cText: "#f4f4f5"            // zinc-100
+    readonly property color cTextMuted: "#a1a1aa"        // zinc-400
+    readonly property color cAccent: "#2563eb"           // Vamora blue-600
+
     property date currentTime: new Date()
-    property int iconSize: 18
+    property int iconSize: 17
     property int trayBtnSize: 28
 
     UserInfo {
@@ -41,7 +50,7 @@ Window {
     Rectangle {
         id: dock
         anchors.fill: parent
-        color: "#CC000000"
+        color: cBarBg
         radius: 0
         border.width: 0
 
@@ -64,11 +73,11 @@ Window {
 
                     background: Rectangle {
                         color: "#00000000"
-                        radius: 6
+                        radius: 8
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
-                            onEntered: parent.color = "#14ffffff"
+                            onEntered: parent.color = cHover
                             onExited: parent.color = "#00000000"
                         }
                     }
@@ -79,8 +88,8 @@ Window {
                         } else {
                         calendarLoader.active = false;   // force the other one shut first
                         startMenu.active = true;
-                        startMenu.item.x = window.x
-                        startMenu.item.y = window.y + window.height
+                        startMenu.item.x = window.x + 8
+                        startMenu.item.y = window.y + window.height + 6
                         }
                     }
                     Image {
@@ -94,20 +103,21 @@ Window {
                 DividerV {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.margins: 4
+                    color: window.cDivider
                 }
 
                 Button { // time
-                    width: 110
+                    width: 118
                     height: trayBtnSize
                     padding: 0
 
                     background: Rectangle {
                         color: "#00000000"
-                        radius: 6
+                        radius: 8
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
-                            onEntered: parent.color = "#14ffffff"
+                            onEntered: parent.color = cHover
                             onExited: parent.color = "#00000000"
                         }
                     }
@@ -118,17 +128,18 @@ Window {
                         } else {
                             startMenu.active = false;   // force the other one shut first
                             calendarLoader.active = true;
-                            calendarLoader.item.x = window.x
-                            calendarLoader.item.y = window.y + window.height
+                            calendarLoader.item.x = window.x + 8
+                            calendarLoader.item.y = window.y + window.height + 6
                         }
                     }
                     Text {
                         id: time
                         anchors.centerIn: parent
                         text: Qt.formatDateTime(currentTime, "hh:mm  ddd, d MMM")
-                        color: "#ffffff"
+                        color: cText
                         font.weight: Font.Medium
                         font.pixelSize: 13
+                        font.family: "Inter"
                     }
                 }
 
@@ -139,11 +150,11 @@ Window {
 
                     background: Rectangle {
                         color: "#00000000"
-                        radius: 6
+                        radius: 8
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
-                            onEntered: parent.color = "#14ffffff"
+                            onEntered: parent.color = cHover
                             onExited: parent.color = "#00000000"
                         }
                     }
@@ -152,12 +163,12 @@ Window {
                         anchors.centerIn: parent
                         width: iconSize
                         height: iconSize
-                        source: "../../assets/icons/notification/read.svg"
+                        source: "../../assets/icons/lucide/bell.svg"
                     }
                 }
             }
 
-            // RIGHT SIDE: arrowup, volume, wifi, config | battery
+            // RIGHT SIDE: expand tray, volume, wifi, settings | battery
             Row {
                 id: rightRow
                 anchors.right: parent.right
@@ -170,11 +181,11 @@ Window {
                     padding: 0
                     background: Rectangle {
                         color: "#00000000"
-                        radius: 6
+                        radius: 8
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
-                            onEntered: parent.color = "#14ffffff"
+                            onEntered: parent.color = cHover
                             onExited: parent.color = "#00000000"
                         }
                     }
@@ -182,7 +193,7 @@ Window {
                         anchors.centerIn: parent
                         width: iconSize
                         height: iconSize
-                        source: "../../assets/icons/arrows/arrowdown.svg"
+                        source: "../../assets/icons/lucide/chevron-down.svg"
                     }
                 }
 
@@ -192,11 +203,11 @@ Window {
                     padding: 0
                     background: Rectangle {
                         color: "#00000000"
-                        radius: 6
+                        radius: 8
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
-                            onEntered: parent.color = "#14ffffff"
+                            onEntered: parent.color = cHover
                             onExited: parent.color = "#00000000"
                         }
                     }
@@ -204,7 +215,7 @@ Window {
                         anchors.centerIn: parent
                         width: iconSize
                         height: iconSize
-                        source: "../../assets/icons/volume/high.svg"
+                        source: "../../assets/icons/lucide/volume-2.svg"
                     }
                 }
 
@@ -214,11 +225,11 @@ Window {
                     padding: 0
                     background: Rectangle {
                         color: "#00000000"
-                        radius: 6
+                        radius: 8
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
-                            onEntered: parent.color = "#14ffffff"
+                            onEntered: parent.color = cHover
                             onExited: parent.color = "#00000000"
                         }
                     }
@@ -228,11 +239,11 @@ Window {
                         height: iconSize
                         source: {
                             switch (userInfo.wifiStrength) {
-                                case 4:  return "../../assets/icons/wifi/four.svg"
-                                case 3:  return "../../assets/icons/wifi/three.svg"
-                                case 2:  return "../../assets/icons/wifi/two.svg"
-                                case 1:  return "../../assets/icons/wifi/one.svg"
-                                default: return "../../assets/icons/wifi/zero.svg"
+                                case 4:  return "../../assets/icons/lucide/wifi.svg"
+                                case 3:  return "../../assets/icons/lucide/wifi-high.svg"
+                                case 2:  return "../../assets/icons/lucide/wifi-low.svg"
+                                case 1:  return "../../assets/icons/lucide/wifi-low.svg"
+                                default: return "../../assets/icons/lucide/wifi-zero.svg"
                             }
                         }
                     }
@@ -244,11 +255,11 @@ Window {
                     padding: 0
                     background: Rectangle {
                         color: "#00000000"
-                        radius: 6
+                        radius: 8
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
-                            onEntered: parent.color = "#14ffffff"
+                            onEntered: parent.color = cHover
                             onExited: parent.color = "#00000000"
                         }
                     }
@@ -256,13 +267,14 @@ Window {
                         anchors.centerIn: parent
                         width: iconSize
                         height: iconSize
-                        source: "../../assets/icons/config.svg"
+                        source: "../../assets/icons/lucide/settings.svg"
                     }
                 }
 
                 DividerV {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.margins: 4
+                    color: window.cDivider
                 }
 
                 Button { // battery
@@ -271,11 +283,11 @@ Window {
                     padding: 0
                     background: Rectangle {
                         color: "#00000000"
-                        radius: 6
+                        radius: 8
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
-                            onEntered: parent.color = "#14ffffff"
+                            onEntered: parent.color = cHover
                             onExited: parent.color = "#00000000"
                         }
                     }
@@ -283,7 +295,7 @@ Window {
                         anchors.centerIn: parent
                         width: iconSize
                         height: iconSize
-                        source: "../../assets/icons/battery/full.svg"
+                        source: "../../assets/icons/lucide/battery-full.svg"
                     }
                 }
             }

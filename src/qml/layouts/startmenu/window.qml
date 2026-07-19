@@ -14,7 +14,17 @@ Window {
     title: "StartMenu"
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
 
-    property int selectedCategoryX: 0
+    // ---- VamoraUI palette (dark, zinc, no transparency here) ----
+    readonly property color cBg: "#18181b"        // zinc-900, solid
+    readonly property color cTopBar: "#27272a"    // zinc-800, solid
+    readonly property color cBorder: "#3f3f46"    // zinc-700
+    readonly property color cSurface: "#27272a"   // zinc-800 (pills / inputs)
+    readonly property color cSurfaceHover: "#3f3f46" // zinc-700
+    readonly property color cText: "#f4f4f5"      // zinc-100
+    readonly property color cTextMuted: "#a1a1aa" // zinc-400
+    readonly property color cAccent: "#ffffff"    // white accent (selected states)
+    readonly property color cOnAccent: "#09090b"  // near-black text/icons on white
+
     property bool isMaximized: false
     property bool ignoreDeactivate: false
     property real normalX: 0
@@ -92,12 +102,12 @@ Window {
 
     Rectangle {
         id: startmenu
-        color: "#CC000000"
+        color: cBg
         width: parent.width
         height: parent.height
-        border.color: "#20ffffff"
+        border.color: cBorder
         border.width: 1
-        radius: isMaximized ? 0 : 12
+        radius: isMaximized ? 0 : 24
 
         // background click-catcher: sits behind everything, closes menu
         // when you click empty space (buttons/grid above it consume their own clicks first)
@@ -109,13 +119,23 @@ Window {
 
         Rectangle {
             // top bar
-            color: "#33838383"
+            color: cTopBar
             width: parent.width
             height: 50
+            radius: isMaximized ? 0 : 24
+
+            // squares off the bottom corners of the top bar so it doesn't
+            // look like a separate rounded pill sitting inside a rounded window
+            Rectangle {
+                color: parent.color
+                width: parent.width
+                height: parent.height / 2
+                y: parent.height / 2
+            }
 
             Rectangle {
                 // topbar outline fyi
-                color: "#20ffffff"
+                color: cBorder
                 width: parent.width
                 height: 1
                 y: 49
@@ -130,9 +150,9 @@ Window {
 
                 background: Rectangle {
                     radius: width / 2
-                    color: "#0Fffffff"
+                    color: cSurface
                     border.width: 1
-                    border.color: "#26ffffff"
+                    border.color: cBorder
                 }
 
                 Image {
@@ -164,25 +184,31 @@ Window {
                 // the search bar
                 id: searchField
                 width: 284
-                height: 30
-                color: "#ffffffff"
+                height: 32
+                color: cText
                 x: ( parent.width / 2 ) - ( width / 2 )
                 y: ( parent.height / 2 ) - ( height / 2 )
                 leftPadding: 35
                 placeholderText: "Search"
+                placeholderTextColor: cTextMuted
+                font.pixelSize: 13
 
                 onTextChanged: applyFilter(text)
 
                 background: Rectangle {
-                    color: "#0Fffffff"
-                    border.color: "#26ffffff"
-                    border.width: 0.5
+                    color: cSurface
+                    border.color: searchField.activeFocus ? cAccent : cBorder
+                    border.width: 1
                     radius: 25
+
+                    Behavior on border.color {
+                        ColorAnimation { duration: 150 }
+                    }
                 }
                 Image {
-                    source: "../../assets/icons/search.svg"
-                    width: 17
-                    height: 17
+                    source: "../../assets/icons/lucide/search.svg"
+                    width: 16
+                    height: 16
                     anchors.verticalCenter: parent.verticalCenter
                     x: 12
                 }
@@ -196,21 +222,21 @@ Window {
 
                 background: Rectangle {
                     radius: width / 2
-                    color: "#0Fffffff"
+                    color: cSurface
                     border.width: 1
-                    border.color: "#26ffffff"
+                    border.color: cBorder
                     MouseArea {
                         anchors.fill: parent
                         hoverEnabled: true
-                        onEntered: parent.color = "#1Affffff"
-                        onExited: parent.color = "#0Fffffff"
+                        onEntered: parent.color = cSurfaceHover
+                        onExited: parent.color = cSurface
                     }
                 }
 
                 onClicked: toggleMaximize()
 
                 Image {
-                    source: isMaximized ? "../../assets/icons/minimize.svg" : "../../assets/icons/maximize.svg"
+                    source: isMaximized ? "../../assets/icons/lucide/minimize.svg" : "../../assets/icons/lucide/maximize.svg"
                     width: 14
                     height: 14
                     anchors.centerIn: parent
@@ -225,13 +251,19 @@ Window {
 
                 background: Rectangle {
                     radius: width / 2
-                    color: "#00ffffff"
+                    color: "#00000000"
                     border.width: 1
-                    border.color: "#26ffffff"
+                    border.color: cBorder
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: parent.color = cSurfaceHover
+                        onExited: parent.color = "#00000000"
+                    }
                 }
 
                 Image {
-                    source: "../../assets/icons/listview.svg"
+                    source: "../../assets/icons/lucide/layout-list.svg"
                     width: 16
                     height: 16
                     anchors.centerIn: parent
@@ -246,13 +278,19 @@ Window {
 
                 background: Rectangle {
                     radius: width / 2
-                    color: "#0Fffffff"
+                    color: cSurface
                     border.width: 1
-                    border.color: "#26ffffff"
+                    border.color: cBorder
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: parent.color = cSurfaceHover
+                        onExited: parent.color = cSurface
+                    }
                 }
 
                 Image {
-                    source: "../../assets/icons/gridview.svg"
+                    source: "../../assets/icons/lucide/layout-grid.svg"
                     width: 16
                     height: 16
                     anchors.centerIn: parent
@@ -287,7 +325,7 @@ Window {
                     background: Rectangle { color: "transparent" }
                     contentItem: Rectangle {
                         radius: 3
-                        color: "#40ffffff"
+                        color: cSurfaceHover
                     }
                 }
 
@@ -337,23 +375,30 @@ Window {
         }
 
         // BOTTOM NAVBAR: pinned / all apps / recents, icon-only
+        property int selectedCategoryIndex: 0
+
         Rectangle {
             id: bottomNav
-            width: 280
-            height: 36
-            color: "#0Affffff"
+            width: 168
+            height: 38
+            color: cSurface
+            border.width: 1
+            border.color: cBorder
             anchors.horizontalCenter: parent.horizontalCenter
-            y: parent.height - height - 12
+            y: parent.height - height - 14
             radius: 50
+
+            readonly property int btnWidth: 52
+            readonly property int btnSpacing: 4
 
             Rectangle {
                 id: selectOverlay
                 height: parent.height - 8
-                color: "#26ffffff"
+                width: bottomNav.btnWidth
                 radius: height / 2
+                color: cAccent
                 anchors.verticalCenter: parent.verticalCenter
-                x: ( selectedCategoryX - 1 ) + 6
-                width: 86
+                x: navRow.x + startmenu.selectedCategoryIndex * (bottomNav.btnWidth + bottomNav.btnSpacing)
 
                 Behavior on x {
                     NumberAnimation { duration: 250; easing.type: Easing.OutQuart }
@@ -363,62 +408,79 @@ Window {
             Row {
                 id: navRow
                 anchors.centerIn: parent
-                width: parent.width - 12
-                spacing: 4
+                spacing: bottomNav.btnSpacing
                 height: parent.height
 
                 Button {
-                    width: 86
+                    width: bottomNav.btnWidth
                     height: parent.height
-
-                    background: Rectangle { color: "#00ffffff" }
+                    background: Rectangle { color: "#00000000" }
 
                     Image {
+                        id: appsIcon
                         anchors.centerIn: parent
-                        source: "../../assets/icons/apps.svg"
+                        source: "../../assets/icons/lucide/apps.svg"
                         width: 16
                         height: 16
+                    }
+                    ColorOverlay {
+                        anchors.fill: appsIcon
+                        source: appsIcon
+                        color: cOnAccent
+                        opacity: startmenu.selectedCategoryIndex === 0 ? 1 : 0
                     }
 
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: selectedCategoryX = parent.x
+                        onClicked: startmenu.selectedCategoryIndex = 0
                     }
                 }
                 Button {
-                    width: 86
+                    width: bottomNav.btnWidth
                     height: parent.height
-
-                    background: Rectangle { color: "#00ffffff" }
+                    background: Rectangle { color: "#00000000" }
 
                     Image {
+                        id: starIcon
                         anchors.centerIn: parent
-                        source: "../../assets/icons/star.svg"
+                        source: "../../assets/icons/lucide/star.svg"
                         width: 16
                         height: 16
+                    }
+                    ColorOverlay {
+                        anchors.fill: starIcon
+                        source: starIcon
+                        color: cOnAccent
+                        opacity: startmenu.selectedCategoryIndex === 1 ? 1 : 0
                     }
 
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: selectedCategoryX = parent.x
+                        onClicked: startmenu.selectedCategoryIndex = 1
                     }
                 }
                 Button {
-                    width: 86
+                    width: bottomNav.btnWidth
                     height: parent.height
-
-                    background: Rectangle { color: "#00ffffff" }
+                    background: Rectangle { color: "#00000000" }
 
                     Image {
+                        id: historyIcon
                         anchors.centerIn: parent
-                        source: "../../assets/icons/history.svg"
+                        source: "../../assets/icons/lucide/history.svg"
                         width: 16
                         height: 16
+                    }
+                    ColorOverlay {
+                        anchors.fill: historyIcon
+                        source: historyIcon
+                        color: cOnAccent
+                        opacity: startmenu.selectedCategoryIndex === 2 ? 1 : 0
                     }
 
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: selectedCategoryX = parent.x
+                        onClicked: startmenu.selectedCategoryIndex = 2
                     }
                 }
             }

@@ -4,5 +4,5 @@ Rectangle {
 	id: divider
 	width: 1
 	height: window.height - 20
-	color: "#33ffffff"
+	color: "#3f3f46" // zinc-700
 }

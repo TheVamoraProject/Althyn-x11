@@ -11,15 +11,15 @@ Button {
     property string execStr: ""
 
     background: Rectangle {
-        color: "#00ffffff"
+        color: "#00272a2e"
         radius: width / 6
 
         MouseArea {
             width: parent.width
             height: parent.height
             hoverEnabled: true
-            onEntered: parent.color = "#0Affffff"
-            onExited: parent.color = "#00ffffff"
+            onEntered: parent.color = "#40272a2e" // zinc-800 hover
+            onExited: parent.color = "#00272a2e"
         }
     }
 
@@ -39,7 +39,7 @@ Button {
 
         Text {
             text: appName
-            color: "#ffffff"
+            color: "#f4f4f5"
             font.pixelSize: 11
             font.weight: Font.Medium
             horizontalAlignment: Text.AlignHCenter

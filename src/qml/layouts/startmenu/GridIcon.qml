@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 
 Button {
-    // size is set by parent (anchors.fill); these are just fallback defaults
     implicitWidth: 80
     implicitHeight: 80
 

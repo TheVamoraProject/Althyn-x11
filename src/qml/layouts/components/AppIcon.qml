@@ -1,3 +1,4 @@
+//the icon only
 import QtQuick
 import QtQuick.Controls
 

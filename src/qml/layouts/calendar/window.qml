@@ -12,7 +12,7 @@ Window {
     title: "Vamora Calendar"
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
 
-    // ---- VamoraUI palette (dark, zinc, solid — no transparency here) ----
+    // ---- Vamora/AlthynUI palette (dark, zinc) ----
     readonly property color cBg: "#18181b"        // zinc-900, solid
     readonly property color cTopBar: "#27272a"    // zinc-800, solid
     readonly property color cBorder: "#3f3f46"    // zinc-700
@@ -56,8 +56,6 @@ Window {
             height: 50
             radius: 24
 
-            // squares off the bottom corners of the top bar so it doesn't
-            // look like a separate rounded pill sitting inside a rounded window
             Rectangle {
                 color: parent.color
                 width: parent.width
@@ -66,14 +64,13 @@ Window {
             }
 
             Rectangle {
-                // topbar outline
                 color: cBorder
                 width: parent.width
                 height: 1
                 y: 49
             }
 
-            Button { // prev month
+            Button { 
                 x: 16
                 y: ( parent.height / 2 ) - ( height / 2 )
                 width: 28
@@ -114,7 +111,7 @@ Window {
                 font.family: "Inter"
             }
 
-            Button { // next month
+            Button { 
                 x: parent.width - width - 16
                 y: ( parent.height / 2 ) - ( height / 2 )
                 width: 28
@@ -147,7 +144,6 @@ Window {
             }
         }
 
-        // WEEKDAY LABEL ROW
         Row {
             id: weekdayRow
             width: parent.width - 24
@@ -171,7 +167,6 @@ Window {
             }
         }
 
-        // DAY GRID
         Grid {
             id: dayGrid
             columns: 7

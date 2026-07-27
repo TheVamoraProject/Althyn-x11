@@ -14,7 +14,7 @@ Window {
     title: "StartMenu"
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
 
-    // ---- VamoraUI palette (dark, zinc, no transparency here) ----
+    // ---- VamoraUI palette (dark, zinc) ----
     readonly property color cBg: "#18181b"        // zinc-900, solid
     readonly property color cTopBar: "#27272a"    // zinc-800, solid
     readonly property color cBorder: "#3f3f46"    // zinc-700
@@ -33,9 +33,7 @@ Window {
     property real normalHeight: height
     property int statusBarHeight: 30 // must match your status bar's height
 
-    // click-anywhere-closes: window loses focus (click outside) -> close
-    // guarded by ignoreDeactivate so resizing (which can transiently
-    // blur/refocus on some compositors) doesn't self-close the window
+    // click outside ==> close
     onActiveChanged: {
         if (!active && !ignoreDeactivate) {
             window.close()
@@ -80,7 +78,7 @@ Window {
         id: appList
     }
 
-    // --- App data ---
+    // --- App data from rust---
     property var allApps: []
     property var filteredApps: []
     property int cols: isMaximized ? 8 : 5
@@ -109,8 +107,7 @@ Window {
         border.width: 1
         radius: isMaximized ? 0 : 24
 
-        // background click-catcher: sits behind everything, closes menu
-        // when you click empty space (buttons/grid above it consume their own clicks first)
+        
         MouseArea {
             anchors.fill: parent
             z: -1
@@ -124,8 +121,7 @@ Window {
             height: 50
             radius: isMaximized ? 0 : 24
 
-            // squares off the bottom corners of the top bar so it doesn't
-            // look like a separate rounded pill sitting inside a rounded window
+            
             Rectangle {
                 color: parent.color
                 width: parent.width
@@ -215,7 +211,7 @@ Window {
             }
 
             Button {
-                x: parent.width - width - 84
+                x: parent.width - width - 16
                 y: ( parent.height / 2 ) - ( height / 2 )
                 width: 28
                 height: 28
@@ -243,59 +239,6 @@ Window {
                 }
             }
 
-            Button {
-                x: parent.width - width - 50
-                y: ( parent.height / 2 ) - ( height / 2 )
-                width: 28
-                height: 28
-
-                background: Rectangle {
-                    radius: width / 2
-                    color: "#00000000"
-                    border.width: 1
-                    border.color: cBorder
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onEntered: parent.color = cSurfaceHover
-                        onExited: parent.color = "#00000000"
-                    }
-                }
-
-                Image {
-                    source: "../../assets/icons/lucide/layout-list.svg"
-                    width: 16
-                    height: 16
-                    anchors.centerIn: parent
-                }
-            }
-
-            Button {
-                x: parent.width - width - 16
-                y: ( parent.height / 2 ) - ( height / 2 )
-                width: 28
-                height: 28
-
-                background: Rectangle {
-                    radius: width / 2
-                    color: cSurface
-                    border.width: 1
-                    border.color: cBorder
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onEntered: parent.color = cSurfaceHover
-                        onExited: parent.color = cSurface
-                    }
-                }
-
-                Image {
-                    source: "../../assets/icons/lucide/layout-grid.svg"
-                    width: 16
-                    height: 16
-                    anchors.centerIn: parent
-                }
-            }
         }
 
         // App grid area (scrollable)
@@ -374,7 +317,7 @@ Window {
             }
         }
 
-        // BOTTOM NAVBAR: pinned / all apps / recents, icon-only
+        // Always on bottom navbar (https://vamora.vercel.app/blog/vamui)
         property int selectedCategoryIndex: 0
 
         Rectangle {

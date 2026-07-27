@@ -16,8 +16,7 @@ Window {
     x: 0
     y: 0
 
-    // ---- VamoraUI palette (dark, zinc) ----
-    // status bar is the ONLY surface that stays translucent (no blur)
+    // ---- Vamora/AlthynUI palette (dark only, zinc) ----
     readonly property color cBarBg: "#CC09090b"        // zinc-950 @ 80%
     readonly property color cHover: "#40272a2e"         // zinc-800 hover overlay
     readonly property color cDivider: "#33ffffff"
@@ -59,7 +58,7 @@ Window {
             anchors.leftMargin: 8
             anchors.rightMargin: 8
 
-            // LEFT SIDE: start | time | notification
+            // LEFT SIDE
             Row {
                 id: leftRow
                 anchors.left: parent.left
@@ -168,7 +167,7 @@ Window {
                 }
             }
 
-            // RIGHT SIDE: expand tray, volume, wifi, settings | battery
+            // RIGHT SIDE
             Row {
                 id: rightRow
                 anchors.right: parent.right

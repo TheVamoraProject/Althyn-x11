@@ -1,3 +1,4 @@
+// justa divider bruh
 import QtQuick
 
 Rectangle {

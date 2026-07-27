@@ -18,14 +18,10 @@
         <file>assets/icons/code.svg</file>
         <file>assets/icons/computer.svg</file>
         <file>assets/icons/config.svg</file>
-        <file>assets/icons/crescent moon.svg</file>
         <file>assets/icons/download.svg</file>
         <file>assets/icons/exclamation.svg</file>
         <file>assets/icons/folder.svg</file>
         <file>assets/icons/folderopen.svg</file>
-        <file>assets/icons/gridview.svg</file>
-        <file>assets/icons/harddrive.svg</file>
-        <file>assets/icons/listview.svg</file>
         <file>assets/icons/nopin.svg</file>
         <file>assets/icons/pin.svg</file>
         <file>assets/icons/star.svg</file>
@@ -36,7 +32,6 @@
         <file>assets/icons/unknown.svg</file>
         <file>assets/icons/help.svg</file>
         <file>assets/icons/usb.svg</file>
-        <file>assets/icons/wavingHand.svg</file>
         <file>assets/icons/irrelevant/arrowup.svg</file>
         <file>assets/icons/irrelevant/internet.svg</file>
         <file>assets/icons/irrelevant/terminal.svg</file>

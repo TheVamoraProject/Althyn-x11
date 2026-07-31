@@ -1,8 +1,8 @@
 # Vamora StatusBar (X11)
 
-Part of **VamoraOS**/**Althyn** — a Qt6/QML + Rust ([cxx-qt](https://github.com/KDAB/cxx-qt)) status bar for VamoraOS. This component targets **X11** window managers (developed and tested on Openbox) as a pre-alpha build; a Wayland/Budgie version is the long-term target.
+Part of [**VamoraOS**](https://github.com/TheVamoraProject/VamoraOS/)/[**Althyn**](https://github.com/TheVamoraProject/Althyn/) — a Qt6/QML + Rust ([cxx-qt](https://github.com/KDAB/cxx-qt)) status bar for VamoraOS. This component targets **X11** window managers (developed and tested on Openbox) as a pre-alpha build; a Wayland version is the long-term target.
 
-It's built with the **VamoraUI** design language: dark-only, zinc color palette, white as the sole accent, no blur/glass effects, no gradients, and Lucide-style icons throughout.
+It's built with the **AlthynUI** design language
 
 ---
 
@@ -10,15 +10,11 @@ It's built with the **VamoraUI** design language: dark-only, zinc color palette,
 
 - [What this is](#what-this-is)
 - [Features](#features)
-- [Architecture](#architecture)
 - [Project Layout](#project-layout)
 - [Dependencies](#dependencies)
 - [Building](#building)
-- [Running](#running)
-- [Design System (VamoraUI)](#design-system-vamoraui)
+- [Design System (AlthynUI)](#design-system-vamoraui)
 - [Icons](#icons)
-- [Known Limitations / Notes](#known-limitations--notes)
-- [Roadmap Ideas](#roadmap-ideas)
 - [License](#license)
 
 ---
@@ -32,7 +28,6 @@ It's built with the **VamoraUI** design language: dark-only, zinc color palette,
 - A calendar popup
 - X11 screen-reservation (EWMH struts) so maximized windows don't sit underneath the bar
 
-The Rust side handles system data (installed apps, user info, wifi strength, profile picture resolution) and exposes it to QML as `QObject`s via `cxx-qt`'s `#[qml_element]` macro. The QML side is pure UI/animation — no business logic lives there beyond simple filtering/formatting.
 
 ---
 
@@ -60,7 +55,7 @@ The Rust side handles system data (installed apps, user info, wifi strength, pro
   - **Add to Homescreen** — copies the `.desktop` file to `~/Desktop/`
   - **Add to Favorite** — copies the `.desktop` file to `~/Desktop/.favorites/`
   - **App Info** — placeholder, not yet implemented
-- Bottom pill-shaped category navbar with an animated sliding selection indicator, switching between:
+- AlthynUI always on Bottom navbar switching between:
   - All apps
   - Favorites (loaded on demand from `~/Desktop/.favorites/`)
   - History (UI present, not yet wired to real data)
@@ -70,58 +65,13 @@ The Rust side handles system data (installed apps, user info, wifi strength, pro
 - Popup window anchored below the status bar clock button, same open/close exclusivity as the start menu
 
 ### System integration
-- **X11 EWMH strut reservation**: on startup, a background thread locates the status bar's own window via `_NET_CLIENT_LIST` + `_NET_WM_PID`, then sets `_NET_WM_STRUT` / `_NET_WM_STRUT_PARTIAL` so X11 window managers reserve the top strip of the screen and don't let maximized windows overlap the bar. Retries for a few seconds in case the window manager hasn't registered the window yet. Wayland compositors ignore this entirely (X11-only, by design, for now).
+- **X11 EWMH strut reservation**: on startup, a background thread locates the status bar's own window via `_NET_CLIENT_LIST` + `_NET_WM_PID`, then sets `_NET_WM_STRUT` / `_NET_WM_STRUT_PARTIAL` so X11 window managers reserve the top strip of the screen and don't let maximized windows overlap the bar. Retries for a few seconds in case the window manager hasn't registered the window yet. Wayland compositors ignore this entirely and it would stay in the middle instead of the top(X11-only, by design, for now).
 - **Profile picture resolution**, checked in priority order:
-  1. `/var/lib/AccountsService/icons/<user>` (what GNOME/Budgie's user switcher reads)
+  1. `/var/lib/AccountsService/icons/<user>` 
   2. `~/.face`
   3. `~/.face.icon`
   4. Falls back to the bundled `account.svg` icon if none exist
 - **Wifi strength polling**, refreshed every 5 seconds alongside username/profile picture
-
----
-
-## Architecture
-
-```
-┌─────────────────────────────┐
-│           QML UI            │  statusbar.qml, startmenu/window.qml,
-│  (VamoraUI, zinc palette)   │  calendar/window.qml, components/*
-└───────────────┬─────────────┘
-                │ cxx-qt QML elements
-┌───────────────┴─────────────┐
-│         Rust core           │
-│  UserInfo   → username, pfp, wifi bars
-│  AppList    → desktop file scanning, launching, favorites
-│  MyObject   → cxx-qt template boilerplate (unused demo QObject)
-└───────────────┬─────────────┘
-                │
-┌───────────────┴─────────────┐
-│   x11strut (background)     │  EWMH strut reservation, X11 only
-└──────────────────────────────┘
-```
-
-The Rust ↔ QML bridge is generated at build time by `cxx-qt-build`, driven entirely by `build.rs`:
-
-```rust
-CxxQtBuilder::new_qml_module(QmlModule::new("com.vamora"))
-    .qt_module("Network")
-    .file("src/cxxqt_object.rs")
-    .file("src/userinfo.rs")
-    .file("src/applist.rs")
-    .qrc("src/qml/qml.qrc")
-    .qrc("src/qml/assets.qrc")
-    .build();
-```
-
-Any new Rust `#[cxx_qt::bridge]` module needs to be added to that `.file(...)` list to actually be compiled and exposed to QML — files sitting in `src/` alone are not automatically picked up.
-
-### Exposed QML types
-
-| QML Type   | Rust file        | Purpose |
-|------------|-------------------|---------|
-| `UserInfo` | `src/userinfo.rs` | Username, profile picture path, wifi signal strength (0–4), refreshable on a timer |
-| `AppList`  | `src/applist.rs`  | Scans `.desktop` files, returns JSON, launches apps, manages Desktop/Favorites shortcuts |
-| `MyObject` | `src/cxxqt_object.rs` | The unmodified `cxx-qt` template demo object (`incrementNumber`, `sayHi`). Not referenced by any QML file — included in the build but currently inert. Safe to repurpose or delete once you don't need the reference example anymore. |
 
 ---
 
@@ -198,25 +148,11 @@ cargo build --release
 
 ---
 
-## Running
 
-```bash
-cargo run --release
-```
-
-Notes for X11 users:
-- The status bar reserves the top strip of the screen automatically — no window manager config needed, as long as your WM respects `_NET_WM_STRUT_PARTIAL` (Openbox does).
-- If the strut reservation fails (e.g. the WM never lists the window in `_NET_CLIENT_LIST` within ~6 seconds), you'll see a warning printed to stderr and maximized windows may overlap the bar. This is non-fatal — the bar keeps running.
-
-Wayland users: the strut logic no-ops silently; there's currently no equivalent Wayland reservation mechanism implemented here (see [Roadmap Ideas](#roadmap-ideas)).
-
----
-
-## Design System (VamoraUI)
+## Design System (AlthynUI)
 
 Consistent across the status bar, start menu, and calendar:
 
-- **Dark mode only** — no light theme
 - **Zinc palette**:
   - `zinc-950 @ ~80% opacity` — status bar background
   - `zinc-900` (`#18181b`) — popup window backgrounds
@@ -249,31 +185,6 @@ If you add a new icon that duplicates an existing flat one by filename, the newe
 
 ---
 
-## Known Limitations / Notes
-
-- **`MyObject` (`cxxqt_object.rs`) is unused.** It's the stock `cxx-qt` template QObject and isn't instantiated anywhere in QML. It's still compiled (it's in `build.rs`'s file list), just inert. Safe to delete or repurpose.
-- **Volume and battery tray icons are static.** They don't reflect real system volume or battery percentage yet — only wifi strength is live.
-- **Notification bell is decorative.** No notification daemon integration yet.
-- **"History" category in the start menu navbar has no backing data** — it's a selectable tab with nothing behind it yet.
-- **"App Info" context menu item is a placeholder** — clicking it just closes the menu.
-- **Inter font is not bundled.** `font.family: "Inter"` will silently fall back to whatever font substitution Qt/Fontconfig picks if Inter isn't installed on the target system.
-- **X11-only.** The strut-reservation mechanism is explicitly X11/EWMH; there is no Wayland layer-shell equivalent implemented in this codebase yet.
-- **Legacy icon subfolders** (`arrows/`, `battery/`, `notification/`, `volume/`, `wifi/`) sit alongside the flat Lucide set and aren't fully unified — some are actively used (`arrows/`, `notification/`), others are effectively superseded duplicates kept for reference (`battery/`, `volume/`, `wifi/`).
-
----
-
-## Roadmap Ideas
-
-Not committed, just directions this component could reasonably grow:
-- Wire up real volume and battery reporting (likely via PipeWire/PulseAudio and UPower respectively)
-- Real notification daemon support (`org.freedesktop.Notifications`)
-- Populate the "History" tab with recently-launched apps
-- Implement the "App Info" context menu entry (name, exec path, `.desktop` source)
-- Bundle Inter (and/or JetBrains Mono, if code/monospace UI is ever needed) via `FontLoader` instead of relying on system fonts
-- A Wayland/layer-shell equivalent of `x11strut.rs` for the eventual Budgie/Wayland target
-- Consolidate the remaining legacy icon subfolders into the flat Lucide-named set
-
----
 
 ## License
 

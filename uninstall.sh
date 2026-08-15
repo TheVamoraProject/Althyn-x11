@@ -16,6 +16,6 @@ rm -fv \
   /usr/bin/vamora-welcome \
   /usr/share/xsessions/vamora.desktop
 
-rm -rfv /etc/VamoraSys/wallpapers
+rm -rf /etc/VamoraSys/wallpapers
 
 echo "Done."

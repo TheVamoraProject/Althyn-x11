@@ -18,6 +18,7 @@
         <file>assets/icons/computer.svg</file>
         <file>assets/icons/config.svg</file>
         <file>assets/icons/download.svg</file>
+        <file>assets/icons/edit.svg</file>
         <file>assets/icons/exclamation.svg</file>
         <file>assets/icons/folder.svg</file>
         <file>assets/icons/folderopen.svg</file>
@@ -35,11 +36,6 @@
         <file>assets/icons/volume/low.svg</file>
         <file>assets/icons/volume/mute.svg</file>
         <file>assets/icons/volume/off.svg</file>
-        <file>assets/icons/wifi/four.svg</file>
-        <file>assets/icons/wifi/three.svg</file>
-        <file>assets/icons/wifi/two.svg</file>
-        <file>assets/icons/wifi/one.svg</file>
-        <file>assets/icons/wifi/zero.svg</file>
         <file>assets/icons/maximize.svg</file>
         <file>assets/icons/minimize.svg</file>
         <file>assets/icons/restore.svg</file>
@@ -56,11 +52,11 @@
         <file>assets/icons/volume-1.svg</file>
         <file>assets/icons/volume-2.svg</file>
         <file>assets/icons/volume-x.svg</file>
-        <file>assets/icons/wifi-high.svg</file>
-        <file>assets/icons/wifi-low.svg</file>
-        <file>assets/icons/wifi-off.svg</file>
-        <file>assets/icons/wifi-zero.svg</file>
-        <file>assets/icons/wifi.svg</file>
+        <file>assets/icons/wifi/wifi-high.svg</file>
+        <file>assets/icons/wifi/wifi-low.svg</file>
+        <file>assets/icons/wifi/wifi-off.svg</file>
+        <file>assets/icons/wifi/wifi-zero.svg</file>
+        <file>assets/icons/wifi/wifi.svg</file>
         <file>assets/icons/monitor.svg</file>
         <file>assets/icons/info.svg</file>
         <file>assets/icons/home.svg</file>

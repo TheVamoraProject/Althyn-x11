@@ -3,6 +3,7 @@ import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
 import QtQuick.Window
 import "../components"
+import com.vamora
 
 Window {
     width: 320
@@ -12,17 +13,35 @@ Window {
     title: "Vamora Calendar"
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
 
-    // ---- Vamora/AlthynUI palette (dark, zinc) ----
-    readonly property color cBg: "#18181b"        // zinc-900, solid
-    readonly property color cTopBar: "#27272a"    // zinc-800, solid
-    readonly property color cBorder: "#3f3f46"    // zinc-700
-    readonly property color cSurface: "#27272a"   // zinc-800
-    readonly property color cSurfaceHover: "#3f3f46" // zinc-700
-    readonly property color cText: "#f4f4f5"      // zinc-100
-    readonly property color cTextMuted: "#a1a1aa" // zinc-400
-    readonly property color cTextFaint: "#71717a" // zinc-500
-    readonly property color cAccent: "#ffffff"    // white accent (today marker)
-    readonly property color cOnAccent: "#09090b"  // near-black text on white
+    // ---- Vamora/AlthynUI palette (zinc, follows appearance.theme) ----
+    readonly property color cBg: isDark ? "#18181b" : "#fafafa"        // zinc-900/50, solid
+    readonly property color cTopBar: isDark ? "#27272a" : "#f4f4f5"    // zinc-800/100, solid
+    readonly property color cBorder: isDark ? "#3f3f46" : "#d4d4d8"    // zinc-700/300
+    readonly property color cSurface: isDark ? "#27272a" : "#f4f4f5"   // zinc-800/100
+    readonly property color cSurfaceHover: isDark ? "#3f3f46" : "#e4e4e7" // zinc-700/200
+    readonly property color cText: isDark ? "#f4f4f5" : "#18181b"      // zinc-100/900
+    readonly property color cTextMuted: isDark ? "#a1a1aa" : "#52525b" // zinc-400/600
+    readonly property color cTextFaint: "#71717a" // zinc-500, subtle in both themes
+    readonly property color cAccent: isDark ? "#ffffff" : "#18181b"    // sole accent: white on dark, near-black on light (today marker)
+    readonly property color cOnAccent: isDark ? "#09090b" : "#fafafa"  // text on the accent
+
+    ThemeManager {
+        id: themeManager
+    }
+
+    // Local QML-native mirror of themeManager.darkMode — see statusbar.qml
+    // for why we don't bind directly to themeManager.darkMode.
+    property bool isDark: true
+
+    Timer {
+        interval: 5000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            isDark = themeManager.refresh()
+        }
+    }
 
     property date viewDate: new Date()
     property date today: new Date()
@@ -70,7 +89,7 @@ Window {
                 y: 49
             }
 
-            Button { 
+            Button {
                 x: 16
                 y: ( parent.height / 2 ) - ( height / 2 )
                 width: 28
@@ -99,6 +118,10 @@ Window {
                     width: 14
                     height: 14
                     anchors.centerIn: parent
+                    layer.enabled: true
+                    layer.effect: ColorOverlay {
+                        color: cText
+                    }
                 }
             }
 
@@ -111,7 +134,7 @@ Window {
                 font.family: "Inter"
             }
 
-            Button { 
+            Button {
                 x: parent.width - width - 16
                 y: ( parent.height / 2 ) - ( height / 2 )
                 width: 28
@@ -140,6 +163,10 @@ Window {
                     width: 14
                     height: 14
                     anchors.centerIn: parent
+                    layer.enabled: true
+                    layer.effect: ColorOverlay {
+                        color: cText
+                    }
                 }
             }
         }

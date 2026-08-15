@@ -14,16 +14,34 @@ Window {
     title: "StartMenu"
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
 
-    // ---- VamoraUI palette (dark, zinc) ----
-    readonly property color cBg: "#18181b"        // zinc-900, solid
-    readonly property color cTopBar: "#27272a"    // zinc-800, solid
-    readonly property color cBorder: "#3f3f46"    // zinc-700
-    readonly property color cSurface: "#27272a"   // zinc-800 (pills / inputs)
-    readonly property color cSurfaceHover: "#3f3f46" // zinc-700
-    readonly property color cText: "#f4f4f5"      // zinc-100
-    readonly property color cTextMuted: "#a1a1aa" // zinc-400
-    readonly property color cAccent: "#ffffff"    // white accent (selected states)
-    readonly property color cOnAccent: "#09090b"  // near-black text/icons on white
+    // ---- VamoraUI palette (zinc, follows appearance.theme) ----
+    readonly property color cBg: isDark ? "#18181b" : "#fafafa"        // zinc-900/50, solid
+    readonly property color cTopBar: isDark ? "#27272a" : "#f4f4f5"    // zinc-800/100, solid
+    readonly property color cBorder: isDark ? "#3f3f46" : "#d4d4d8"    // zinc-700/300
+    readonly property color cSurface: isDark ? "#27272a" : "#f4f4f5"   // zinc-800/100 (pills / inputs)
+    readonly property color cSurfaceHover: isDark ? "#3f3f46" : "#e4e4e7" // zinc-700/200
+    readonly property color cText: isDark ? "#f4f4f5" : "#18181b"      // zinc-100/900
+    readonly property color cTextMuted: isDark ? "#a1a1aa" : "#52525b" // zinc-400/600
+    readonly property color cAccent: isDark ? "#ffffff" : "#18181b"    // sole accent: white on dark, near-black on light
+    readonly property color cOnAccent: isDark ? "#09090b" : "#fafafa"  // text/icons on the accent
+
+    ThemeManager {
+        id: themeManager
+    }
+
+    // Local QML-native mirror of themeManager.darkMode — see statusbar.qml
+    // for why we don't bind directly to themeManager.darkMode.
+    property bool isDark: true
+
+    Timer {
+        interval: 5000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            isDark = themeManager.refresh()
+        }
+    }
 
     property bool isMaximized: false
     property bool ignoreDeactivate: false
@@ -263,6 +281,10 @@ Window {
                     height: 16
                     anchors.verticalCenter: parent.verticalCenter
                     x: 12
+                    layer.enabled: true
+                    layer.effect: ColorOverlay {
+                        color: cTextMuted
+                    }
                 }
             }
 
@@ -292,6 +314,10 @@ Window {
                     width: 14
                     height: 14
                     anchors.centerIn: parent
+                    layer.enabled: true
+                    layer.effect: ColorOverlay {
+                        color: cText
+                    }
                 }
             }
 
@@ -356,6 +382,8 @@ Window {
                         appName: modelData.appName
                         iconPath: modelData.iconPath
                         execStr: modelData.execStr
+                        textColor: cText
+                        hoverColor: cSurfaceHover
                     }
 
                     MouseArea {
@@ -440,7 +468,7 @@ Window {
                             ColorOverlay {
                                 anchors.fill: iconHomescreen
                                 source: iconHomescreen
-                                color: "#f4f4f5"
+                                color: cText
                             }
                         }
                         Text {
@@ -494,7 +522,7 @@ Window {
                             ColorOverlay {
                                 anchors.fill: iconFavorite
                                 source: iconFavorite
-                                color: "#f4f4f5"
+                                color: cText
                             }
                         }
                         Text {
@@ -548,7 +576,7 @@ Window {
                             ColorOverlay {
                                 anchors.fill: iconInfo
                                 source: iconInfo
-                                color: "#f4f4f5"
+                                color: cText
                             }
                         }
                         Text {
@@ -631,8 +659,7 @@ Window {
                     ColorOverlay {
                         anchors.fill: appsIcon
                         source: appsIcon
-                        color: cOnAccent
-                        opacity: startmenu.selectedCategoryIndex === 0 ? 1 : 0
+                        color: startmenu.selectedCategoryIndex === 0 ? cOnAccent : cText
                     }
 
                     MouseArea {
@@ -655,8 +682,7 @@ Window {
                     ColorOverlay {
                         anchors.fill: starIcon
                         source: starIcon
-                        color: cOnAccent
-                        opacity: startmenu.selectedCategoryIndex === 1 ? 1 : 0
+                        color: startmenu.selectedCategoryIndex === 1 ? cOnAccent : cText
                     }
 
                     MouseArea {
@@ -679,8 +705,7 @@ Window {
                     ColorOverlay {
                         anchors.fill: historyIcon
                         source: historyIcon
-                        color: cOnAccent
-                        opacity: startmenu.selectedCategoryIndex === 2 ? 1 : 0
+                        color: startmenu.selectedCategoryIndex === 2 ? cOnAccent : cText
                     }
 
                     MouseArea {

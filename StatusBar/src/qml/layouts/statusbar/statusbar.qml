@@ -16,13 +16,13 @@ Window {
     x: 0
     y: 0
 
-    // ---- Vamora/AlthynUI palette (dark only, zinc) ----
-    readonly property color cBarBg: "#CC09090b"        // zinc-950 @ 80%
-    readonly property color cHover: "#40272a2e"         // zinc-800 hover overlay
-    readonly property color cDivider: "#33ffffff"
-    readonly property color cText: "#f4f4f5"            // zinc-100
-    readonly property color cTextMuted: "#a1a1aa"        // zinc-400
-    readonly property color cAccent: "#2563eb"           // Vamora blue-600
+    // ---- Vamora/AlthynUI palette (zinc, follows appearance.theme) ----
+    readonly property color cBarBg: isDark ? "#09090b" : "#fafafa"        // zinc-950/50, solid
+    readonly property color cHover: isDark ? "#40272a2e" : "#40d4d4d8"    // zinc-800/300 hover overlay
+    readonly property color cDivider: isDark ? "#33ffffff" : "#33000000"
+    readonly property color cText: isDark ? "#f4f4f5" : "#18181b"         // zinc-100/900
+    readonly property color cTextMuted: isDark ? "#a1a1aa" : "#52525b"    // zinc-400/600
+    readonly property color cAccent: "#2563eb"           // Vamora blue-600, same in both themes
 
     property date currentTime: new Date()
     property int iconSize: 17
@@ -31,6 +31,18 @@ Window {
     UserInfo {
         id: userInfo
     }
+
+    ThemeManager {
+        id: themeManager
+    }
+
+    // Local QML-native mirror of themeManager.darkMode. Reading the C++/Rust
+    // property directly in bindings depends on cxx-qt correctly registering
+    // a NOTIFY signal for it — assigning it into a plain QML property here
+    // sidesteps that entirely, since QML's own property system always
+    // notifies dependents on assignment, regardless of what's happening on
+    // the Rust side.
+    property bool isDark: true
 
     Timer {
         interval: 1000
@@ -44,6 +56,18 @@ Window {
         running: true
         repeat: true
         onTriggered: userInfo.refresh()
+    }
+
+    // Statusbar never closes, so it can't pick up appearance.theme changes
+    // on relaunch like other apps do — poll instead.
+    Timer {
+        interval: 5000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            isDark = themeManager.refresh()
+        }
     }
 
     Rectangle {
@@ -86,6 +110,7 @@ Window {
                         startMenu.active = false;
                         } else {
                         calendarLoader.active = false;   // force the other one shut first
+                        quickSettingsLoader.active = false;
                         startMenu.active = true;
                         startMenu.item.x = window.x + 8
                         startMenu.item.y = window.y + window.height + 6
@@ -126,6 +151,7 @@ Window {
                             calendarLoader.active = false;
                         } else {
                             startMenu.active = false;   // force the other one shut first
+                            quickSettingsLoader.active = false;
                             calendarLoader.active = true;
                             calendarLoader.item.x = window.x + 8
                             calendarLoader.item.y = window.y + window.height + 6
@@ -163,6 +189,10 @@ Window {
                         width: iconSize
                         height: iconSize
                         source: "../../assets/icons/notification/bell.svg"
+                        layer.enabled: true
+                        layer.effect: ColorOverlay {
+                            color: cText
+                        }
                     }
                 }
             }
@@ -193,6 +223,10 @@ Window {
                         width: iconSize
                         height: iconSize
                         source: "../../assets/icons/arrows/arrowdown.svg"
+                        layer.enabled: true
+                        layer.effect: ColorOverlay {
+                            color: cText
+                        }
                     }
                 }
 
@@ -215,6 +249,10 @@ Window {
                         width: iconSize
                         height: iconSize
                         source: "../../assets/icons/volume-2.svg"
+                        layer.enabled: true
+                        layer.effect: ColorOverlay {
+                            color: cText
+                        }
                     }
                 }
 
@@ -238,17 +276,21 @@ Window {
                         height: iconSize
                         source: {
                             switch (userInfo.wifiStrength) {
-                                case 4:  return "../../assets/icons/wifi.svg"
-                                case 3:  return "../../assets/icons/wifi-high.svg"
-                                case 2:  return "../../assets/icons/wifi-low.svg"
-                                case 1:  return "../../assets/icons/wifi-low.svg"
-                                default: return "../../assets/icons/wifi-zero.svg"
+                                case 4:  return "../../assets/icons/wifi/wifi.svg"
+                                case 3:  return "../../assets/icons/wifi/wifi-high.svg"
+                                case 2:  return "../../assets/icons/wifi/wifi-low.svg"
+                                case 1:  return "../../assets/icons/wifi/wifi-low.svg"
+                                default: return "../../assets/icons/wifi/wifi-zero.svg"
                             }
+                        }
+                        layer.enabled: true
+                        layer.effect: ColorOverlay {
+                            color: cText
                         }
                     }
                 }
 
-                Button {
+                Button { // quick settings
                     width: trayBtnSize
                     height: trayBtnSize
                     padding: 0
@@ -266,7 +308,23 @@ Window {
                         anchors.centerIn: parent
                         width: iconSize
                         height: iconSize
-                        source: "../../assets/icons/settings.svg"
+                        source: "../../assets/icons/config.svg"
+                        layer.enabled: true
+                        layer.effect: ColorOverlay {
+                            color: cText
+                        }
+                    }
+
+                    onClicked: {
+                        if ( quickSettingsLoader.active ) {
+                            quickSettingsLoader.active = false;
+                        } else {
+                            startMenu.active = false;      // force the others shut first
+                            calendarLoader.active = false;
+                            quickSettingsLoader.active = true;
+                            quickSettingsLoader.item.x = window.x + window.width - quickSettingsLoader.item.width - 8
+                            quickSettingsLoader.item.y = window.y + window.height + 6
+                        }
                     }
                 }
 
@@ -294,7 +352,11 @@ Window {
                         anchors.centerIn: parent
                         width: iconSize
                         height: iconSize
-                        source: "../../assets/icons/battery-full.svg"
+                        source: "../../assets/icons/battery/battery-full.svg"
+                        layer.enabled: true
+                        layer.effect: ColorOverlay {
+                            color: cText
+                        }
                     }
                 }
             }
@@ -310,6 +372,12 @@ Window {
     Loader {
         id: calendarLoader
         source: "../calendar/window.qml"
+        active: false
+    }
+
+    Loader {
+        id: quickSettingsLoader
+        source: "../quicksettings/window.qml"
         active: false
     }
 }

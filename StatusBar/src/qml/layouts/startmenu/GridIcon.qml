@@ -8,6 +8,8 @@ Button {
     property string appName: ""
     property string iconPath: ""
     property string execStr: ""
+    property color textColor: "#f4f4f5"
+    property color hoverColor: "#40272a2e"
 
     background: Rectangle {
         color: "#00272a2e"
@@ -17,7 +19,7 @@ Button {
             width: parent.width
             height: parent.height
             hoverEnabled: true
-            onEntered: parent.color = "#40272a2e" // zinc-800 hover
+            onEntered: parent.color = hoverColor
             onExited: parent.color = "#00272a2e"
         }
     }
@@ -38,7 +40,7 @@ Button {
 
         Text {
             text: appName
-            color: "#f4f4f5"
+            color: textColor
             font.pixelSize: 11
             font.weight: Font.Medium
             horizontalAlignment: Text.AlignHCenter

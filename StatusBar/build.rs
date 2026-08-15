@@ -6,6 +6,7 @@ fn main() {
         .file("src/cxxqt_object.rs")
         .file("src/userinfo.rs")
         .file("src/applist.rs")
+        .file("src/theme.rs")
         .qrc("src/qml/qml.qrc")
         .qrc("src/qml/assets.qrc")
         .build();

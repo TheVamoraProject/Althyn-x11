@@ -1,6 +1,11 @@
 # Vamora StatusBar (X11)
 
-Part of [**VamoraOS**](https://github.com/TheVamoraProject/VamoraOS/)/[**Althyn**](https://github.com/TheVamoraProject/Althyn/) — a Qt6/QML + Rust ([cxx-qt](https://github.com/KDAB/cxx-qt)) status bar for VamoraOS. This component targets **X11** window managers (developed and tested on Openbox) as a pre-alpha build; a Wayland version is the long-term target.
+Part of [**VamoraOS**](https://github.com/TheVamoraProject/VamoraOS/) — a Qt6/QML + Rust ([cxx-qt](https://github.com/KDAB/cxx-qt)) status bar for VamoraOS. This component targets **X11** window managers (developed and tested on Openbox) as a pre-alpha build.
+
+> [!IMPORTANT]
+> This X11 build is a compatibility track, not the priority. **[Althyn](https://github.com/TheVamoraProject/Althyn/)
+> (Wayland)** is the actively developed, prioritized version, and the upcoming Vamora compositor is
+> Wayland-only — it will not run this X11 build at all.
 
 It's built with the **AlthynUI** design language
 

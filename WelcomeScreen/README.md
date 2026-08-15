@@ -6,6 +6,11 @@
 QML + CXX-Qt + Rust implementation of the VamoraOS first-boot welcome flow.
 </p>
 
+> [!IMPORTANT]
+> This is the **X11** build (part of Althyn-x11), a compatibility track. The prioritized, actively
+> developed version is **[Althyn](https://github.com/TheVamoraProject/Althyn/) (Wayland)**, and the
+> upcoming Vamora compositor is Wayland-only.
+
 ## Features
 
 - **Language Select** : Select the language and it would change using `localetcl`

@@ -143,7 +143,7 @@ Window {
     }
 
     // ── App context menu (right-click on an app icon) ──────────────────────
-    ContextMenu {
+    AppContextMenu {
         id: appContextMenu
         hostWindow: window
 
@@ -174,7 +174,7 @@ Window {
     }
 
     // ── Background context menu (right-click on empty desktop) ────────────
-    ContextMenu {
+    AppContextMenu {
         id: bgContextMenu
         hostWindow: window
 

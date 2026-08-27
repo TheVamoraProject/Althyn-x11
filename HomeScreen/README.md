@@ -1,4 +1,6 @@
-<img height="400" alt="HomeScreen" src="https://github.com/user-attachments/assets/9a21879b-c1e9-45ba-af32-6fb0f6d283fb" />
+<p align="center">
+<img height="300" alt="HomeScreen" src="https://github.com/user-attachments/assets/9a21879b-c1e9-45ba-af32-6fb0f6d283fb" />
+</p>
 
 # Vamora HomeScreen (X11)
 Part of [**VamoraOS**](https://github.com/TheVamoraProject/VamoraOS/) — a Qt6/QML + Rust ([cxx-qt](https://github.com/KDAB/cxx-qt)) desktop/home layer for VamoraOS. This component targets **X11** window managers (developed and tested on Openbox) as a pre-alpha build.

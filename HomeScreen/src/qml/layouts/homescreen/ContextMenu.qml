@@ -54,6 +54,13 @@ Item {
     // Declared as a direct child of the Window in window.qml, so it's
     // already parented to the window's contentItem automatically —
     // no need (and no safe cross-file way) to set `parent` explicitly here.
+    //
+    // NOTE: a plain Item has no implicit size, so it must be sized
+    // explicitly to the host window — otherwise the full-window dismiss
+    // MouseArea below (anchors.fill: parent) covers a 0x0 area and
+    // clicking outside the menu silently does nothing.
+    width: root.hostWindow ? root.hostWindow.width : 0
+    height: root.hostWindow ? root.hostWindow.height : 0
 
     // ── Full-window dismiss layer ──────────────────────────────────────────
     MouseArea {

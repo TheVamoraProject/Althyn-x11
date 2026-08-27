@@ -64,17 +64,37 @@ Item {
         enabled: tile.hasApp
         acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-        onClicked: function(mouse) {
-            if (mouse.button === Qt.LeftButton) {
-                tile.clicked()
-            }
-        }
+        // Set true once a press-and-hold has already opened the context
+        // menu for the current press, so the release that follows doesn't
+        // also fire a normal tap (which would launch the app).
+        property bool longPressHandled: false
 
         onPressed: function(mouse) {
+            longPressHandled = false
             if (mouse.button === Qt.RightButton) {
                 // Map tile-local position to window coordinates
                 var pt = tile.mapToItem(null, mouse.x, mouse.y)
                 tile.rightClicked(pt.x, pt.y)
+            }
+        }
+
+        // Touch/mobile users have no right-click, so a long press on the
+        // tile does the same job: open the same context menu.
+        onPressAndHold: function(mouse) {
+            if (mouse.button === Qt.LeftButton) {
+                longPressHandled = true
+                var pt = tile.mapToItem(null, mouse.x, mouse.y)
+                tile.rightClicked(pt.x, pt.y)
+            }
+        }
+
+        onClicked: function(mouse) {
+            if (longPressHandled) {
+                longPressHandled = false
+                return
+            }
+            if (mouse.button === Qt.LeftButton) {
+                tile.clicked()
             }
         }
     }

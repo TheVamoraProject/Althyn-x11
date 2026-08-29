@@ -19,6 +19,11 @@ Window {
     property var apps: []
     property var layout: ({})
     property var pagesModel: [[]]
+    // True only for the brief window right after startup, so the first
+    // homescreen paint plays the entrance "bloom" once. Cleared shortly
+    // after so the periodic refresh() below (which rebuilds every icon
+    // every few seconds) never replays it.
+    property bool firstLoad: true
 
     AppList { id: appList }
 
@@ -40,7 +45,7 @@ Window {
         if(!saved||!saved.grid||saved.grid.columns!==gridCols||saved.grid.rows!==gridRows||!Array.isArray(saved.pages)||saved.pages.length<1||saved.pages.length>100){layout=defaultLayout();persist()}else layout=saved; buildPages(); if(apps.length && pagesModel.every(function(page){return page.length===0;})){layout=defaultLayout();persist();buildPages()}
     }
     function addPage(){if(pagesModel.length<100){pagesModel=pagesModel.concat([[]]);persist();pagesView.currentIndex=pagesModel.length-1}}
-    function removePage(){if(pagesModel.length>1){pagesModel.splice(pagesView.currentIndex,1);pagesModel=pagesModel;persist();pagesView.currentIndex=Math.max(0,pagesView.currentIndex-1)}}
+    function removePage(){if(pagesModel.length>1){pagesModel.splice(pagesView.currentIndex,1);pagesModel=pagesModel.slice();persist();pagesView.currentIndex=Math.max(0,pagesView.currentIndex-1)}}
     // Moves itemData from fromPageIndex to the adjacent page (fromPageIndex + direction),
     // dropping it into the first free cell there. Creates a new trailing page on
     // demand if the item is dragged past the last page. Also flips the SwipeView
@@ -48,14 +53,21 @@ Window {
     function moveItemAcrossPages(itemData, direction, fromPageIndex) {
         var toPageIndex = fromPageIndex + direction
         if (toPageIndex < 0) return
-        if (toPageIndex >= pagesModel.length) {
-            if (pagesModel.length >= 100) return
-            pagesModel = pagesModel.concat([[]])
+        var newPagesModel = pagesModel.slice()
+        if (toPageIndex >= newPagesModel.length) {
+            if (newPagesModel.length >= 100) return
+            newPagesModel = newPagesModel.concat([[]])
         }
-        var fromItems = pagesModel[fromPageIndex]
+        // Work on fresh copies of the two affected pages (not the arrays
+        // pagesModel already holds references to) — mutating those in place
+        // (splice/push) wouldn't change their reference, and QML's change
+        // notification for "items" only fires on a genuinely different
+        // reference. Without this, the destination page's icon list quietly
+        // never re-renders even though the data is correct underneath.
+        var fromItems = newPagesModel[fromPageIndex].slice()
         var srcIdx = fromItems.indexOf(itemData)
         if (srcIdx === -1) return
-        var toItems = pagesModel[toPageIndex]
+        var toItems = newPagesModel[toPageIndex].slice()
 
         var w = itemData.width || 1, h = itemData.height || 1
         var placed = false
@@ -74,18 +86,74 @@ Window {
         fromItems.splice(srcIdx, 1)
         itemData.page = toPageIndex
         toItems.push(itemData)
-        pagesModel = pagesModel
+        newPagesModel[fromPageIndex] = fromItems
+        newPagesModel[toPageIndex] = toItems
+        pagesModel = newPagesModel
         persist()
         pagesView.currentIndex = toPageIndex
     }
-    function refresh(){var before=JSON.stringify(pagesModel); apps=JSON.parse(appList.getAppsJson());buildPages(); if(JSON.stringify(pagesModel)!==before) persist()}
+    // Commits a dragged item's new x/y/width/height into the canonical
+    // pagesModel and saves to disk. Deliberately does NOT trust that `item`
+    // is literally the same object reference pagesModel already holds —
+    // matches by reference first, falls back to matching by desktopPath/id,
+    // and always persists at the end regardless, so a save is never silently
+    // skipped.
+    function updateItemPosition(pageIndex, item) {
+        var pg = pagesModel[pageIndex]
+        if (!pg) { persist(); return }
+        var idx = pg.indexOf(item)
+        if (idx === -1) {
+            for (var i=0;i<pg.length;i++) {
+                var it = pg[i]
+                if ((item.desktopPath && it.desktopPath===item.desktopPath) || (it.id===item.id && it.type===item.type && it.appName===item.appName)) { idx=i; break }
+            }
+        }
+        if (idx !== -1) {
+            var newPg = pg.slice()
+            newPg[idx] = Object.assign({}, newPg[idx], {x:item.x, y:item.y, width:item.width, height:item.height})
+            var newModel = pagesModel.slice()
+            newModel[pageIndex] = newPg
+            pagesModel = newModel
+        }
+        persist()
+    }
+    function refresh(){
+        var freshApps=JSON.parse(appList.getAppsJson());
+        // Guard against a transient/incomplete app scan wiping the homescreen:
+        // if it comes back empty while pages already have items placed, skip
+        // this cycle rather than treating every icon as "uninstalled" and
+        // having buildPages() re-flow everything back into a fresh
+        // alphabetical layout (and persisting that bad state).
+        var hasPlacedItems=pagesModel.some(function(pg){return pg.length>0});
+        if (freshApps.length===0 && hasPlacedItems) return;
+        var before=JSON.stringify(pagesModel);
+        var beforeModel=pagesModel;
+        apps=freshApps;
+        buildPages();
+        if(JSON.stringify(pagesModel)!==before) {
+            persist();
+        } else {
+            // Nothing actually changed. buildPages() unconditionally builds
+            // brand-new page/item objects, and reassigning pagesModel to them
+            // would destroy and recreate every icon delegate — which, if a
+            // drag is in progress right now, destroys the very cell being
+            // dragged before its release handler (the one that saves the
+            // dropped position) ever runs. Restore the original reference so
+            // nothing rebuilds when there's no real change to show.
+            pagesModel=beforeModel;
+        }
+    }
     Component.onCompleted: load()
     Timer { interval:3000; running:true; repeat:true; onTriggered:refresh() }
+    // Entrance animation window: long enough for the slowest-staggered icon
+    // (bottom-right of a full page) to finish blooming, comfortably before
+    // the first periodic refresh() above would otherwise force a replay.
+    Timer { interval:1100; running:true; repeat:false; onTriggered: window.firstLoad=false }
 
     Row { id: indicatorRow; anchors.top:parent.top; anchors.topMargin:48; anchors.horizontalCenter:parent.horizontalCenter; spacing:8; z:10
         Repeater { model: window.pagesModel.length; Rectangle { readonly property bool active:index===pagesView.currentIndex; width:active?22:7;height:7;radius:3.5;color:active?cDotActive:cDotInactive; MouseArea{anchors.fill:parent;anchors.margins:-6;onClicked:pagesView.currentIndex=index} } }
     }
-    SwipeView { id:pagesView; anchors.top:indicatorRow.bottom; anchors.topMargin:24; anchors.bottom:parent.bottom; anchors.left:parent.left; anchors.right:parent.right; anchors.bottomMargin:24; clip:true; Repeater { model:window.pagesModel.length; HomePage { items:window.pagesModel[index]||[]; cols:gridCols; rows:gridRows; textColor:cText; hoverColor:cHover; onLaunch:function(e){appList.launchApp(e)}; onItemChanged:function(item){window.persist()}; onAppRightClicked:function(x,y,path,name){appContextMenu.targetDesktopPath=path;appContextMenu.targetAppName=name;appContextMenu.popup(x,y)}; onBgRightClicked:function(x,y){bgContextMenu.popup(x,y)}; onRequestPageShift:function(item,direction){window.moveItemAcrossPages(item,direction,index)} } } }
+    SwipeView { id:pagesView; anchors.top:indicatorRow.bottom; anchors.topMargin:24; anchors.bottom:parent.bottom; anchors.left:parent.left; anchors.right:parent.right; anchors.bottomMargin:24; clip:true; Repeater { model:window.pagesModel.length; HomePage { items:window.pagesModel[index]||[]; cols:gridCols; rows:gridRows; textColor:cText; hoverColor:cHover; animateEntrance:window.firstLoad; onLaunch:function(e){appList.launchApp(e)}; onItemChanged:function(item){window.updateItemPosition(index,item)}; onAppRightClicked:function(x,y,path,name){appContextMenu.targetDesktopPath=path;appContextMenu.targetAppName=name;appContextMenu.popup(x,y)}; onBgRightClicked:function(x,y){bgContextMenu.popup(x,y)}; onRequestPageShift:function(item,direction){window.moveItemAcrossPages(item,direction,index)} } } }
     ContextMenu { id:appContextMenu; hostWindow:window; property string targetDesktopPath:""; property string targetAppName:""; model:[{label:"Remove from Homescreen",icon:"../../assets/icons/pin-off.svg",destructive:true,action:function(){appList.removeApp(targetDesktopPath);refresh()}},{label:"---"},{label:"App Info",icon:"../../assets/icons/info.svg"}] }
-    ContextMenu { id:bgContextMenu; hostWindow:window; model:[{label:"Add Page",icon:"../../assets/icons/apps.svg",action:function(){addPage()}},{label:"Remove Current Page",icon:"../../assets/icons/pin-off.svg",destructive:true,action:function(){removePage()}},{label:"---"},{label:"Shut Down",icon:"../../assets/icons/power.svg",destructive:true,action:function(){appList.shutdown()}}] }
+    ContextMenu { id:bgContextMenu; hostWindow:window; model:[{label:"Add Page",icon:"../../assets/icons/apps.svg",action:function(){addPage()}},{label:"Remove Current Page",icon:"../../assets/icons/pin-off.svg",destructive:true,action:function(){removePage()}},{label:"Add Widget",icon:"../../assets/icons/apps.svg"},{label:"Homescreen Settings",icon:"../../assets/icons/info.svg"},{label:"Refresh",icon:"../../assets/icons/info.svg",action:function(){refresh()}},{label:"---"},{label:"Power",icon:"../../assets/icons/power.svg",destructive:true,action:function(){appList.launchApp("vamora-powermenu")}}] }
 }

@@ -15,11 +15,18 @@ Item {
     // of the page, requesting a move to the adjacent page. direction is
     // -1 (previous page) or +1 (next page).
     signal requestPageShift(var itemData, int direction)
-    // How close to the page edge (in px) a dragged item must get before
-    // the hold timer starts.
-    property int edgeZone: 32
-    // How long (ms) an item must be held at the edge before it shifts pages.
-    property int edgeHoldDuration: 650
+    // How close to the true page edge (in px) a dropped item must be to move
+    // it to the adjacent page instead of just repositioning it on this page.
+    property int edgeZone: 30
+    // Minimum total drag distance (px) required before an edge drop counts as
+    // "move to the other page" — without this, simply picking an icon up and
+    // putting it back down near its own resting spot (which can already sit
+    // close to the page edge) would wrongly send it to the next page.
+    property int meaningfulDragThreshold: 40
+    // When true, newly-created icon cells play a staggered "bloom" entrance
+    // (HyperOS-style cascade) instead of appearing instantly. Set by the
+    // window for the initial homescreen load only.
+    property bool animateEntrance: false
 
     MouseArea {
         anchors.fill: parent
@@ -54,6 +61,26 @@ Item {
             height: Math.max(cellH, itemData.height * cellH)
             z: dragArea.drag.active ? 10 : 1
 
+            // iOS/HyperOS-style entrance: only on the initial homescreen load
+            // (page.animateEntrance), icons "bloom" in from small+transparent
+            // to full size, with a ripple delay based on distance from the
+            // center of the grid — center icons pop first, the ripple spreads
+            // outward to the edges, like a respring/unlock animation.
+            property bool playEntrance: page.animateEntrance
+            property real distFromCenter: Math.sqrt(Math.pow(itemData.x - (page.cols - 1) / 2, 2) + Math.pow(itemData.y - (page.rows - 1) / 2, 2))
+            opacity: playEntrance ? 0 : 1
+            scale: playEntrance ? 0.4 : 1
+            transformOrigin: Item.Center
+            Component.onCompleted: if (playEntrance) entranceAnim.start()
+            SequentialAnimation {
+                id: entranceAnim
+                PauseAnimation { duration: cell.distFromCenter * 55 }
+                ParallelAnimation {
+                    NumberAnimation { target: cell; property: "opacity"; to: 1; duration: 200; easing.type: Easing.OutQuad }
+                    NumberAnimation { target: cell; property: "scale"; to: 1; duration: 380; easing.type: Easing.OutBack; easing.overshoot: 1.9 }
+                }
+            }
+
             Rectangle { anchors.fill: parent; anchors.margins: 4; radius: 14; color: dragArea.containsMouse ? page.hoverColor : "transparent"; visible: itemData.type !== "app" || dragArea.containsMouse }
             AppTile {
                 anchors.fill: parent; anchors.margins: Math.max(4, Math.floor(Math.min(cellW,cellH)*0.08))
@@ -67,37 +94,19 @@ Item {
                 id: dragArea; anchors.fill: parent; acceptedButtons: Qt.LeftButton; hoverEnabled: true; propagateComposedEvents: true
                 drag.target: cell; drag.axis: Drag.XAndYAxis
 
-                // Direction the item is currently held against an edge:
-                // -1 left, +1 right, 0 neither.
-                property int pendingEdgeDir: 0
+                property real pressX: 0
+                property real pressY: 0
 
-                Timer {
-                    id: edgeHoldTimer
-                    interval: page.edgeHoldDuration
-                    repeat: false
-                    onTriggered: {
-                        if (dragArea.pendingEdgeDir !== 0) {
-                            page.requestPageShift(itemData, dragArea.pendingEdgeDir)
-                            dragArea.pendingEdgeDir = 0
-                        }
-                    }
-                }
-
-                function updateEdgeHold() {
-                    var dir = 0
-                    if (cell.x <= page.edgeZone) dir = -1
-                    else if (cell.x + cell.width >= page.width - page.edgeZone) dir = 1
-                    if (dir !== dragArea.pendingEdgeDir) {
-                        dragArea.pendingEdgeDir = dir
-                        if (dir !== 0) edgeHoldTimer.restart()
-                        else edgeHoldTimer.stop()
-                    }
-                }
-
-                onPositionChanged: if (drag.active) dragArea.updateEdgeHold()
+                onPressed: { dragArea.pressX = cell.x; dragArea.pressY = cell.y }
 
                 onReleased: {
-                    edgeHoldTimer.stop(); dragArea.pendingEdgeDir = 0
+                    var draggedDistance = Math.abs(cell.x - dragArea.pressX) + Math.abs(cell.y - dragArea.pressY)
+                    var nearLeftEdge = cell.x <= page.edgeZone
+                    var nearRightEdge = (cell.x + cell.width) >= (page.width - page.edgeZone)
+                    if (draggedDistance >= page.meaningfulDragThreshold && (nearLeftEdge || nearRightEdge)) {
+                        page.requestPageShift(itemData, nearLeftEdge ? -1 : 1)
+                        return
+                    }
                     var nx=Math.max(0,Math.min(page.cols-itemData.width,Math.round((cell.x-16)/cellW)))
                     var ny=Math.max(0,Math.min(page.rows-itemData.height,Math.round((cell.y-16)/cellH)))
                     itemData.x=nx; itemData.y=ny; cell.x=16+nx*cellW; cell.y=16+ny*cellH; page.itemChanged(itemData)

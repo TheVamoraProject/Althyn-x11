@@ -28,6 +28,21 @@ Window {
     property int iconSize: 17
     property int trayBtnSize: 28
 
+    function openQuickSettings() {
+        if (quickSettingsLoader.active) {
+            quickSettingsLoader.active = false
+        } else {
+            startMenu.active = false
+            calendarLoader.active = false
+            notificationLoader.active = false
+            trayLoader.active = false
+            quickSettingsLoader.active = true
+            quickSettingsLoader.item.x =
+                window.x + window.width - quickSettingsLoader.item.width - 8
+            quickSettingsLoader.item.y = window.y + window.height + 6
+        }
+    }
+
     UserInfo {
         id: userInfo
     }
@@ -111,6 +126,8 @@ Window {
                         } else {
                         calendarLoader.active = false;   // force the other one shut first
                         quickSettingsLoader.active = false;
+                        notificationLoader.active = false;
+                        trayLoader.active = false;
                         startMenu.active = true;
                         startMenu.item.x = window.x + 8
                         startMenu.item.y = window.y + window.height + 6
@@ -152,6 +169,8 @@ Window {
                         } else {
                             startMenu.active = false;   // force the other one shut first
                             quickSettingsLoader.active = false;
+                            notificationLoader.active = false;
+                            trayLoader.active = false;
                             calendarLoader.active = true;
                             calendarLoader.item.x = window.x + 8
                             calendarLoader.item.y = window.y + window.height + 6
@@ -169,6 +188,7 @@ Window {
                 }
 
                 Button { // notification
+                    id: notificationButton
                     width: trayBtnSize
                     height: trayBtnSize
                     padding: 0
@@ -194,6 +214,23 @@ Window {
                             color: cText
                         }
                     }
+
+                    onClicked: {
+                        if (notificationLoader.active) {
+                            notificationLoader.active = false
+                        } else {
+                            startMenu.active = false
+                            calendarLoader.active = false
+                            quickSettingsLoader.active = false
+                            trayLoader.active = false
+                            notificationLoader.active = true
+                            var point = notificationButton.mapToItem(
+                                window.contentItem, 0, 0)
+                            notificationLoader.item.x = window.x + point.x
+                            notificationLoader.item.y =
+                                window.y + window.height + 6
+                        }
+                    }
                 }
             }
 
@@ -205,6 +242,7 @@ Window {
                 spacing: 2
 
                 Button {
+                    id: trayButton
                     width: trayBtnSize
                     height: trayBtnSize
                     padding: 0
@@ -228,135 +266,81 @@ Window {
                             color: cText
                         }
                     }
-                }
-
-                Button {
-                    width: trayBtnSize
-                    height: trayBtnSize
-                    padding: 0
-                    background: Rectangle {
-                        color: "#00000000"
-                        radius: 8
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onEntered: parent.color = cHover
-                            onExited: parent.color = "#00000000"
-                        }
-                    }
-                    Image {
-                        anchors.centerIn: parent
-                        width: iconSize
-                        height: iconSize
-                        source: "../../assets/icons/volume-2.svg"
-                        layer.enabled: true
-                        layer.effect: ColorOverlay {
-                            color: cText
-                        }
-                    }
-                }
-
-                Button {
-                    width: trayBtnSize
-                    height: trayBtnSize
-                    padding: 0
-                    background: Rectangle {
-                        color: "#00000000"
-                        radius: 8
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onEntered: parent.color = cHover
-                            onExited: parent.color = "#00000000"
-                        }
-                    }
-                    Image {
-                        anchors.centerIn: parent
-                        width: iconSize
-                        height: iconSize
-                        source: {
-                            switch (userInfo.wifiStrength) {
-                                case 4:  return "../../assets/icons/wifi/wifi.svg"
-                                case 3:  return "../../assets/icons/wifi/wifi-high.svg"
-                                case 2:  return "../../assets/icons/wifi/wifi-low.svg"
-                                case 1:  return "../../assets/icons/wifi/wifi-low.svg"
-                                default: return "../../assets/icons/wifi/wifi-zero.svg"
-                            }
-                        }
-                        layer.enabled: true
-                        layer.effect: ColorOverlay {
-                            color: cText
-                        }
-                    }
-                }
-
-                Button { // quick settings
-                    width: trayBtnSize
-                    height: trayBtnSize
-                    padding: 0
-                    background: Rectangle {
-                        color: "#00000000"
-                        radius: 8
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onEntered: parent.color = cHover
-                            onExited: parent.color = "#00000000"
-                        }
-                    }
-                    Image {
-                        anchors.centerIn: parent
-                        width: iconSize
-                        height: iconSize
-                        source: "../../assets/icons/config.svg"
-                        layer.enabled: true
-                        layer.effect: ColorOverlay {
-                            color: cText
-                        }
-                    }
 
                     onClicked: {
-                        if ( quickSettingsLoader.active ) {
-                            quickSettingsLoader.active = false;
+                        if (trayLoader.active) {
+                            trayLoader.active = false
                         } else {
-                            startMenu.active = false;      // force the others shut first
-                            calendarLoader.active = false;
-                            quickSettingsLoader.active = true;
-                            quickSettingsLoader.item.x = window.x + window.width - quickSettingsLoader.item.width - 8
-                            quickSettingsLoader.item.y = window.y + window.height + 6
+                            startMenu.active = false
+                            calendarLoader.active = false
+                            quickSettingsLoader.active = false
+                            notificationLoader.active = false
+                            trayLoader.active = true
+                            var point = trayButton.mapToItem(
+                                window.contentItem, 0, 0)
+                            trayLoader.item.x = window.x + point.x -
+                                trayLoader.item.width + trayButton.width
+                            trayLoader.item.y = window.y + window.height + 6
                         }
                     }
                 }
 
-                DividerV {
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.margins: 4
-                    color: window.cDivider
-                }
-
-                Button { // battery
-                    width: trayBtnSize
+                // These indicators remain visible, but form one control-center
+                // button. The single hover surface spans all three icons.
+                Button {
+                    id: controlCenterButton
+                    width: trayBtnSize * 3 + 4
                     height: trayBtnSize
                     padding: 0
+
                     background: Rectangle {
-                        color: "#00000000"
                         radius: 8
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onEntered: parent.color = cHover
-                            onExited: parent.color = "#00000000"
+                        color: controlCenterMouse.containsMouse
+                            ? cHover : "#00000000"
+                    }
+
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: 7
+
+                        Image {
+                            width: iconSize
+                            height: iconSize
+                            source: "../../assets/icons/volume-2.svg"
+                            layer.enabled: true
+                            layer.effect: ColorOverlay { color: cText }
+                        }
+
+                        Image {
+                            width: iconSize
+                            height: iconSize
+                            source: {
+                                switch (userInfo.wifiStrength) {
+                                    case 4: return "../../assets/icons/wifi/wifi.svg"
+                                    case 3: return "../../assets/icons/wifi/wifi-high.svg"
+                                    case 2: return "../../assets/icons/wifi/wifi-low.svg"
+                                    case 1: return "../../assets/icons/wifi/wifi-low.svg"
+                                    default: return "../../assets/icons/wifi/wifi-zero.svg"
+                                }
+                            }
+                            layer.enabled: true
+                            layer.effect: ColorOverlay { color: cText }
+                        }
+
+                        Image {
+                            width: iconSize
+                            height: iconSize
+                            source: "../../assets/icons/battery/battery-full.svg"
+                            layer.enabled: true
+                            layer.effect: ColorOverlay { color: cText }
                         }
                     }
-                    Image {
-                        anchors.centerIn: parent
-                        width: iconSize
-                        height: iconSize
-                        source: "../../assets/icons/battery/battery-full.svg"
-                        layer.enabled: true
-                        layer.effect: ColorOverlay {
-                            color: cText
-                        }
+
+                    MouseArea {
+                        id: controlCenterMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onClicked: window.openQuickSettings()
                     }
                 }
             }
@@ -378,6 +362,18 @@ Window {
     Loader {
         id: quickSettingsLoader
         source: "../quicksettings/window.qml"
+        active: false
+    }
+
+    Loader {
+        id: notificationLoader
+        source: "../notifications/window.qml"
+        active: false
+    }
+
+    Loader {
+        id: trayLoader
+        source: "../tray/window.qml"
         active: false
     }
 }

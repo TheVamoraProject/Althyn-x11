@@ -7,6 +7,9 @@
         <file>layouts/startmenu/GridIcon.qml</file>
         <file>layouts/startmenu/window.qml</file>
         <file>layouts/calendar/window.qml</file>
+        <file>layouts/notifications/window.qml</file>
+        <file>layouts/tray/window.qml</file>
         <file>layouts/quicksettings/window.qml</file>
+        <file>layouts/quicksettings/addtile.qml</file>
     </qresource>
 </RCC>

@@ -180,12 +180,33 @@ Window {
                 }
 
                 Image {
+                    id: pfpFallback
+                    anchors.centerIn: parent
+                    width: parent.width
+                    height: parent.height
+                    source: "qrc:/assets/icons/account.svg"
+                    fillMode: Image.PreserveAspectCrop
+                    layer.enabled: true
+                    layer.effect: OpacityMask {
+                        maskSource: Rectangle {
+                            width: pfpFallback.width
+                            height: pfpFallback.height
+                            radius: width / 2
+                        }
+                    }
+                }
+
+                Image {
                     id: pfpImage
                     anchors.centerIn: parent
                     width: parent.width
                     height: parent.height
                     source: userInfo.pfpPath
                     fillMode: Image.PreserveAspectCrop
+                    visible: status === Image.Ready
+                    smooth: false
+                    sourceSize.width: 128
+                    sourceSize.height: 128
                     layer.enabled: true
                     layer.effect: OpacityMask {
                         maskSource: Rectangle {
@@ -238,7 +259,7 @@ Window {
                 Text {
                     id: usernameText
                     anchors.centerIn: parent
-                    text: userInfo.username
+                    text: userInfo.fullName
                     color: cText
                     font.pixelSize: 12
                     font.family: "Inter"

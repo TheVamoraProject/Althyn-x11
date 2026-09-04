@@ -10,6 +10,7 @@ pub mod qobject {
         #[qml_element]
         #[qproperty(QString, pfp_path)]
         #[qproperty(QString, username)]
+        #[qproperty(QString, full_name)]
         #[qproperty(i32, wifi_strength)]
         type UserInfo = super::UserInfoRust;
 
@@ -26,6 +27,7 @@ use std::path::PathBuf;
 pub struct UserInfoRust {
     pfp_path: QString,
     username: QString,
+    full_name: QString,
     wifi_strength: i32,
 }
 
@@ -33,7 +35,8 @@ impl Default for UserInfoRust {
     fn default() -> Self {
         Self {
             pfp_path: QString::from(&find_pfp_path()),
-            username: QString::from(&env::var("USER").unwrap_or_default()),
+            username: QString::from(&current_username()),
+            full_name: QString::from(&find_full_name()),
             wifi_strength: read_wifi_strength(),
         }
     }
@@ -43,10 +46,55 @@ impl qobject::UserInfo {
     pub fn refresh(mut self: Pin<&mut Self>) {
         let path = find_pfp_path();
         self.as_mut().set_pfp_path(QString::from(&path));
-        let user = env::var("USER").unwrap_or_default();
+        let user = current_username();
         self.as_mut().set_username(QString::from(&user));
+        self.as_mut().set_full_name(QString::from(&find_full_name()));
         self.set_wifi_strength(read_wifi_strength());
     }
+}
+
+fn current_username() -> String {
+    env::var("USER").unwrap_or_default()
+}
+
+/// Reads the user's display name from the GECOS field. If no full name is
+/// configured, keep the login name as a useful, non-empty fallback.
+fn find_full_name() -> String {
+    let user = current_username();
+
+    let accounts_service_path = format!("/var/lib/AccountsService/users/{}", user);
+    if let Ok(accounts_service) =
+        std::fs::read_to_string(accounts_service_path)
+    {
+        for line in accounts_service.lines() {
+            if let Some(value) = line.strip_prefix("RealName=") {
+                let name = value.trim().trim_matches('"');
+                if !name.is_empty() {
+                    return name.to_string();
+                }
+            }
+        }
+    }
+
+    if let Ok(passwd) = std::fs::read_to_string("/etc/passwd") {
+        for line in passwd.lines() {
+            let fields: Vec<&str> = line.split(':').collect();
+            if fields.first().copied() == Some(user.as_str()) {
+                let gecos = fields.get(4)
+                    .and_then(|value| value.split(',').next())
+                    .unwrap_or("")
+                    .trim();
+                if !gecos.is_empty()
+                    && gecos != "x"
+                    && gecos != "User"
+                {
+                    return gecos.to_string();
+                }
+            }
+        }
+    }
+
+    user
 }
 
 /// Reads wifi link quality from /proc/net/wireless and maps it to 0–4 bars.

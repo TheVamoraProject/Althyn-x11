@@ -34,6 +34,16 @@ pub mod qobject {
         #[qinvokable]
         #[cxx_name = "getFavoritesJson"]
         fn get_favorites_json(self: &AppList) -> QString;
+
+        /// Loads the user's persisted control-center layout.
+        #[qinvokable]
+        #[cxx_name = "getQuickSettingsLayout"]
+        fn get_quick_settings_layout(self: &AppList) -> QString;
+
+        /// Persists the user's control-center layout.
+        #[qinvokable]
+        #[cxx_name = "saveQuickSettingsLayout"]
+        fn save_quick_settings_layout(self: &AppList, layout: &QString);
     }
 }
 
@@ -104,6 +114,22 @@ impl qobject::AppList {
         }
         apps.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
         QString::from(apps_to_json(&apps).as_str())
+    }
+
+    pub fn get_quick_settings_layout(&self) -> QString {
+        let path = quick_settings_layout_path();
+        QString::from(
+            &std::fs::read_to_string(path)
+                .unwrap_or_default(),
+        )
+    }
+
+    pub fn save_quick_settings_layout(&self, layout: &QString) {
+        let path = quick_settings_layout_path();
+        if let Some(parent) = path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        let _ = std::fs::write(path, format!("{}", layout));
     }
 
     pub fn copy_to_favorites(&self, desktop_file_path: &QString) {
@@ -242,6 +268,21 @@ fn clean_exec(exec: &str) -> String {
     }
     // collapse extra whitespace
     result.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+fn quick_settings_layout_path() -> PathBuf {
+    std::env::var("HOME")
+        .ok()
+        .filter(|value| !value.is_empty())
+        .map(|home| {
+            PathBuf::from(home)
+                .join(".VamoraSys")
+                .join("althyn")
+                .join("statusbar")
+                .join("controlcenter")
+                .join("layout.json")
+        })
+        .unwrap_or_else(|| PathBuf::from("layout.json"))
 }
 
 /// Try to resolve an icon name or path to a file:// URL QML can load.

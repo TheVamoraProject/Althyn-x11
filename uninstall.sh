@@ -12,6 +12,7 @@ fi
 rm -fv \
   /usr/local/bin/althyn \
   /usr/bin/vamora-homescreen \
+  /usr/bin/vamora-dock \
   /usr/bin/vamora-statusbar \
   /usr/bin/vamora-welcome \
   /usr/share/xsessions/vamora.desktop \

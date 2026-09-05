@@ -14,8 +14,8 @@ rm -fv \
   /usr/bin/vamora-homescreen \
   /usr/bin/vamora-statusbar \
   /usr/bin/vamora-welcome \
-  /usr/share/xsessions/vamora.desktop
+  /usr/share/xsessions/vamora.desktop \
+  /usr/local/bin/vamora-powermenu
 
-rm -rf /etc/VamoraSys/wallpapers
 
 echo "Done."
